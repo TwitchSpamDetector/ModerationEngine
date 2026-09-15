@@ -26,3 +26,23 @@ management:
     web:
       exposure:
         include: health
+
+resilience4j:
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1   # menor = más externo
+    instances:
+      centralApi:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15s
+        permitted-number-of-calls-in-half-open-state: 5
+  retry:
+    retry-aspect-order: 2
+    instances:
+      centralApi:
+        max-attempts: 3
+        wait-duration: 300ms
+        enable-exponential-backoff: true
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException

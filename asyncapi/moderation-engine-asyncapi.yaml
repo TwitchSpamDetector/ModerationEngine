@@ -1,0 +1,60 @@
+asyncapi: '2.6.0'
+info:
+  title: Moderation Engine - Chat Messages Queue
+  version: 1.0.0
+  description: >
+    Contrato de la cola de RabbitMQ por la que el Ingestor publica cada
+    mensaje de chat de Twitch y el Motor de Moderacion lo consume.
+    No hay exchange propio: el Ingestor publica con `sendToQueue` sobre el
+    exchange por defecto de RabbitMQ, directo a esta cola.
+
+servers:
+  local:
+    url: amqp://localhost:5672
+    protocol: amqp
+    description: RabbitMQ local (Docker Compose)
+
+channels:
+  chat-messages:
+    description: >
+      Cola durable. Nombre configurable de ambos lados (MODERATION_QUEUE en
+      el Ingestor, app.rabbitmq.queue en el Motor de Moderacion) pero el
+      valor por defecto en ambos es "chat-messages" y debe coincidir.
+    subscribe:
+      summary: El Motor de Moderacion consume cada mensaje de chat publicado por el Ingestor.
+      operationId: consumeChatMessage
+      message:
+        $ref: '#/components/messages/ChatMessage'
+
+components:
+  messages:
+    ChatMessage:
+      name: ChatMessage
+      title: Mensaje de chat capturado por el Ingestor
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ChatMessage'
+
+  schemas:
+    ChatMessage:
+      type: object
+      required: [messageId, channelId, userId, username, text, timestamp]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        channelId:
+          type: string
+          example: mi_canal_twitch
+        userId:
+          type: string
+          example: "123456789"
+        username:
+          type: string
+          example: usuario_random
+        text:
+          type: string
+          example: hola a todos!
+        timestamp:
+          type: string
+          format: date-time

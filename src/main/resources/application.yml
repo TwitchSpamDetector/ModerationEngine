@@ -1,0 +1,28 @@
+server:
+  port: 8000
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: moderation-engine
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+app:
+  central-api:
+    # TODO: URL real de la API central (donde vive POST /channels/{channelId}/verdicts)
+    base-url: ${CENTRAL_API_BASE_URL:http://localhost:8080}
+  rabbitmq:
+    # Debe coincidir con MODERATION_QUEUE del Ingestor (mismo default: chat-messages).
+    # No hay exchange/routing-key: el Ingestor publica directo a esta cola.
+    queue: ${MODERATION_QUEUE:chat-messages}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

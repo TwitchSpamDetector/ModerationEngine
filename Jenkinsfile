@@ -2,10 +2,22 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk21' // Configurar esta tool en Jenkins > Global Tool Configuration
+        jdk 'jdk21'
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Build #${BUILD_NUMBER}"
+                sh 'ls -la'
+            }
+        }
+
         stage('Install') {
             steps {
                 sh 'chmod +x mvnw'
@@ -25,9 +37,10 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build (opcional)') {
             steps {
-                sh 'docker build -t twitchspamdetector/moderation-engine:${BUILD_NUMBER} .'
+                echo 'Pendiente: configurar Docker CLI o agent docker'
+                // sh 'docker build -t twitchspamdetector/moderation-engine:${BUILD_NUMBER} .'
             }
         }
     }
@@ -35,6 +48,12 @@ pipeline {
     post {
         always {
             cleanWs()
+        }
+        success {
+            echo "✅ Build #${BUILD_NUMBER} OK"
+        }
+        failure {
+            echo "❌ Build #${BUILD_NUMBER} FALLÓ"
         }
     }
 }
